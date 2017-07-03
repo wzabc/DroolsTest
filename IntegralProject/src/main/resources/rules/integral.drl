@@ -1,0 +1,179 @@
+package com.yc.pro  //这个必须放在第一行，package的名字是随意的，不必必须对应物理地址，跟java中的不同
+//导入规则文件需要使用到的外部文件，这里的import导入的不仅仅可以是一个类，也可以是这个类中的某一个可访问的静态方法
+import com.yc.pro.User;
+import com.yc.pro.Order;
+
+//初级会员的规则， 买20及20以下的货物 赠送积分  总售价*0.5的积分     20到50之间送 20*0.5+总售价*0.7
+rule "primaryMember1"
+	//属性部分
+	//优先级
+	salience 100   
+	//控制当前的规则只被执行一次
+	lock-on-active true   
+	
+	//条件部分，即LHS,
+	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
+	when
+		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
+		$order:Order();
+        $use:User( u_level=="初级会员" && $order.getO_amountMoney()<=20.0);
+        
+    //结果部分，即RHS
+    then
+    	
+    	
+    	$order.setO_point((float)($order.getO_amountMoney()*0.5));
+    
+    	$use.setU_point((float)($use.getU_point()+$order.getO_amountMoney()*0.5));
+    	System.out.println($use.getU_point());
+    	$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+		$use.recordPointLog($use.getU_id(),"primaryMember",$use.getU_point());
+    	
+end
+
+
+rule "primaryMember2"
+	//属性部分
+	//优先级
+	salience 99   
+	//控制当前的规则只被执行一次
+	lock-on-active true   
+	
+	//条件部分，即LHS,
+	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
+	when
+		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
+		$order:Order();
+        $use:User( u_level=="初级会员" && $order.getO_amountMoney()>=20 && $order.getO_amountMoney()<=50);
+        
+    //结果部分，即RHS
+    then
+    	$order.setO_point((float)(($order.getO_amountMoney()-20)*0.7+10));
+    
+    	$use.setU_point((float)($use.getU_point()+($order.getO_amountMoney()-20)*0.7+10));
+    	System.out.println($use.getU_point());
+    	$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+		$use.recordPointLog($use.getU_id(),"primaryMember2",$use.getU_point());
+    	
+end
+
+//高级会员    购买货物时  可获得9.5折优惠  并可得积分为：折后价格*0.8+5
+rule "hightMember"
+	//属性部分
+	//优先级
+	salience 101   
+	//控制当前的规则只被执行一次
+	lock-on-active true   
+	
+	//条件部分，即LHS,
+	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
+	when
+		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
+		$order:Order();
+        $use:User( u_level=="高级会员" );
+        
+    //结果部分，即RHS
+    then
+    	$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
+    	$order.setO_point((float)($order.getO_amountMoney()*0.8+5));
+    
+    	$use.setU_point((float)($use.getU_point()+$order.getO_point()));
+    	
+    	$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+		$use.recordPointLog($use.getU_id(),"hightMember",$use.getU_point());
+    	
+end
+
+rule "PrimaryToHightMember"
+	//属性部分
+	//优先级
+	salience 98 
+	//控制当前的规则只被执行一次
+	lock-on-active true   
+	
+	//条件部分，即LHS,
+	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
+	when
+		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
+		//如何从外部拿一个值进来
+		$flag:Integer(flag02==1);
+		$order:Order();
+        $use:User( u_level=="初级会员" && u_point>=500 );
+        
+    //结果部分，即RHS
+    then
+    	System.out.println("升级成功");
+    	//$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
+    	//$order.setO_point((float)($order.getO_amountMoney()*0.8+5));
+    
+    	//$use.setU_point((float)($use.getU_point()+$order.getO_point()));
+    	
+    	//$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+		//$use.recordPointLog($use.getU_id(),"PrimaryToHightMember",$use.getU_point());
+		
+    	
+end
+
+/*
+rule "billThisMonthPoint"
+	//2017-7-1 -2017-12-12每月信用卡还款3次以上，每满3笔赠送30分
+	salience 99
+	lock-on-active true
+	date-effective "01-007-2017"  //设置规则的生效时间
+	date-expires "24-012-2017"   //设置规则的过期时间
+	
+    when
+       $pointDome : PointDome( billThisMonth>3)
+       
+    then
+        $pointDome.setPoint($pointDome.getPoint()+$pointDome.getBillThisMonth()/3*30);
+       	
+       	$pointDome.recordPointLog($pointDome.getUserName(),"billThisMonthPoint");
+       	
+end
+
+
+rule "buyMoneyPoint"
+	//当月购物金额100以上，每100送10分积分
+	salience 98
+	lock-on-active true
+	
+	when 
+		 $pointDome : PointDome(buyMoney>=100 )
+	then
+		 $pointDome.setPoint( $pointDome.getPoint()+(int)$pointDome.getBuyMoney()/100*10);
+		 
+ 		$pointDome.recordPointLog($pointDome.getUserName(),"buyMoneyPoin");
+end
+
+rule  "buyNumPoint"
+	//当月购物次数5次以上，每5次赠送50分
+	salience 97
+	lock-on-active true
+	
+	when 
+		 $pointDome : PointDome(buyNum>5 )
+	then 
+		 $pointDome.setPoint( $pointDome.getPoint()+$pointDome.getBuyNum()/5*50);
+		 
+		 $pointDome.recordPointLog($pointDome.getUserName(),"buyNumPoint");
+end 
+
+
+
+//200积分可抵现金2元
+rule "allFitPoint"
+	salience 96
+	lock-on-active  true
+	//如果全部满足，则额外加100 积分
+	when
+ 	 	$use:User( u_point>=200);
+ 	 	$order :Oder();
+	then
+		$order.setO_amountMoney((float)($order.getO_amountMoney()-(int)$user.getU_point()/200*2));
+		$use.setU_point($use.getU_point()-200);
+		$order.orderPoint($order.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+		$use.recordPointLog($use.getU_id(),"allFitPoint",$use.getU_point());
+		
+end
+*/
