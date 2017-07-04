@@ -7,6 +7,8 @@ public class User {
 	private String u_level;
 	private float u_point;
 
+	private int flag;
+
 	public void recordPointLog(int u_id, String type, float u_point) {
 		System.err.println("会员：" + u_id + "的类型为" + type + "的积分操作记录" + ",总共的积分：" + u_point);
 
@@ -44,20 +46,31 @@ public class User {
 		this.u_point = u_point;
 	}
 
-	public User(int u_id, String u_name, String u_level, float u_point) {
+	public User() {
+		super();
+	}
+
+	public int getFlag() {
+		return flag;
+	}
+
+	public void setFlag(int flag) {
+		this.flag = flag;
+	}
+
+	@Override
+	public String toString() {
+		return "User [u_id=" + u_id + ", u_name=" + u_name + ", u_level=" + u_level + ", u_point=" + u_point + ", flag="
+		        + flag + "]";
+	}
+
+	public User(int u_id, String u_name, String u_level, float u_point, int flag) {
 		super();
 		this.u_id = u_id;
 		this.u_name = u_name;
 		this.u_level = u_level;
 		this.u_point = u_point;
+		this.flag = flag;
 	}
 
-	public User() {
-		super();
-	}
-
-	@Override
-	public String toString() {
-		return "User [u_id=" + u_id + ", u_name=" + u_name + ", u_level=" + u_level + ", u_point=" + u_point + "]";
-	}
 }

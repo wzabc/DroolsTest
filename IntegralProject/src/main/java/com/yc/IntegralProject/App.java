@@ -58,6 +58,7 @@ public class App {
 		float price = Float.valueOf(danjia);
 		System.out.println();
 		Scanner scan2 = new Scanner(System.in);
+
 		System.out.println("请输入个数：");
 		String numbers = scan2.nextLine();
 		int number = Integer.parseInt(numbers);
@@ -73,10 +74,10 @@ public class App {
 		try {
 			Map<String, Object> map = useDao.doLevel(member);
 			user.setU_level((String) (map.get("U_LEVEL")));
-			// user.setU_id(Integer.parseInt((String) map.get("U_ID")));
 			user.setU_id(member);
 			user.setU_name((String) (map.get("U_NAME")));
 			user.setU_point(Float.parseFloat((String) (map.get("U_POINT"))));
+			user.setFlag(Integer.parseInt((String) map.get("TFLAG")));
 		} catch (FileNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

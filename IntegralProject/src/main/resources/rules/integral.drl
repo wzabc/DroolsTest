@@ -148,11 +148,11 @@ rule "PrimaryToTemporaryMember"
 		//如何从外部拿一个值进来
 		//$flag:Integer(flag02==1);
 		$order:Order();
-        $use:User( u_level=="初级会员" && u_point>=200 );
+        $use:User( u_level=="初级会员" && u_point>=200);
         
     //结果部分，即RHS
     then
-    	int tflag=3;
+    	
     	System.out.println("积分已超过200，是否升级为临时会员？");
     	Scanner scan = new Scanner(System.in);
     	String flag = scan.nextLine();
@@ -166,18 +166,46 @@ rule "PrimaryToTemporaryMember"
     			System.out.println("会员升级成功");
     			
     		}
+    	}
+end
+
+// 临时会员  ，购买货物时可得9.5折优惠
+rule "TemporaryMember"
+	//属性部分
+	//优先级
+	salience 94
+	//控制当前的规则只被执行一次
+	lock-on-active true   
+	
+	//条件部分，即LHS,
+	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
+	when
+		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
+		//如何从外部拿一个值进来
+		//$flag:Integer(flag02==1);
+		$order:Order();
+        $use:User( u_level=="临时会员");
+        
+    //结果部分，即RHS
+    then
+    	UserDao userServices=new UserDao();
+    	if($use.getFlag()<3){
+    		$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
     		
-    		
+    		boolean result=userServices.updateFlag($use.getU_id());
+    		$use.setFlag((int)$use.getFlag()+1);
+    		if(result){
+    			System.out.println("您的临时会员已使用次数为："+ $use.getFlag());
+    			$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+    			
+    		}
+    	}
+    	if($use.getFlag()==3){
+    		System.out.println("您的临时会员已使用3次数，自动转为初级会员");
+    		$use.setU_level("初级会员");
+    		userServices.updateUserLevel($use.getU_id(),$use.getU_level());
     	}
     	
-    	//$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
-    	//$order.setO_point((float)($order.getO_amountMoney()*0.8+5));
-    
-    	//$use.setU_point((float)($use.getU_point()+$order.getO_point()));
-    	
-    	//$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
-		//$use.recordPointLog($use.getU_id(),"PrimaryToHightMember",$use.getU_point());
-		
     	
 end
 

@@ -13,7 +13,7 @@ public class UserDao {
 
 	// 判断会员等级
 	public Map<String, Object> doLevel(int member) throws FileNotFoundException, SQLException {
-		String sql = "select u_id,u_name,u_level,u_point from tUser where u_id=?";
+		String sql = "select u_id,u_name,u_level,u_point,tflag from tUser where u_id=?";
 		List<Object> params = new ArrayList<>();
 		params.add(member);
 
@@ -49,4 +49,18 @@ public class UserDao {
 		}
 		return false;
 	}
+
+	// 记录临时会员购买次数
+	public boolean updateFlag(int member) throws FileNotFoundException, SQLException {
+		String sql = "update tUser set tflag=tflag+1 where u_id=?";
+		List<Object> params = new ArrayList<>();
+		params.add(member);
+
+		int result = db.doUpdate(sql, params);
+		if (result > 0) {
+			return true;
+		}
+		return false;
+	}
+
 }
