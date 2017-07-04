@@ -86,19 +86,17 @@ public class App {
 		order.setO_count(number);
 		order.setO_amountMoney(money);
 
-		Integer flag02 = null;
-		if (user.getU_level() == "初级会员" && user.getU_point() >= 500) {
-			System.out.println("您的积分已超过500，是否愿意花500积分升级为高级会员？");
-			Scanner flag03 = new Scanner(System.in);
-			if (flag03.equals("是") || flag03.equals("y") || flag03.equals("Y")) {
-				flag02 = 1;
-			} else {
-				flag02 = 0;
-			}
+		/*
+		 * Integer flag02 = null; if (user.getU_level() == "初级会员" &&
+		 * user.getU_point() >= 500) {
+		 * System.out.println("您的积分已超过500，是否愿意花500积分升级为高级会员？"); Scanner flag03 =
+		 * new Scanner(System.in); if (flag03.equals("是") || flag03.equals("y")
+		 * || flag03.equals("Y")) { flag02 = 1; } else { flag02 = 0; }
+		 * 
+		 * }
+		 */
 
-		}
-
-		kSession.insert(flag02);
+		// kSession.insert(flag02);
 		kSession.insert(user);
 		kSession.insert(order);
 
@@ -107,6 +105,7 @@ public class App {
 		// 这里是规则里面传出来的数据一定会做的操作
 		OrderDao orderDao = new OrderDao();
 		// System.out.println(";" + user.getU_point());
+
 		int u_id = user.getU_id();
 		float u_point = user.getU_point();
 		try {

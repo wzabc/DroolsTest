@@ -2,6 +2,9 @@ package com.yc.pro  //这个必须放在第一行，package的名字是随意的
 //导入规则文件需要使用到的外部文件，这里的import导入的不仅仅可以是一个类，也可以是这个类中的某一个可访问的静态方法
 import com.yc.pro.User;
 import com.yc.pro.Order;
+import java.util.Scanner;
+import com.yc.dao.UserDao;
+
 
 //初级会员的规则， 买20及20以下的货物 赠送积分  总售价*0.5的积分     20到50之间送 20*0.5+总售价*0.7
 rule "primaryMember1"
@@ -63,7 +66,7 @@ rule "hightMember"
 	//优先级
 	salience 101   
 	//控制当前的规则只被执行一次
-	lock-on-active true   
+	//lock-on-active true   
 	
 	//条件部分，即LHS,
 	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
@@ -96,13 +99,77 @@ rule "PrimaryToHightMember"
 	when
 		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
 		//如何从外部拿一个值进来
-		$flag:Integer(flag02==1);
+		//$flag:Integer(flag02==1);
 		$order:Order();
         $use:User( u_level=="初级会员" && u_point>=500 );
         
     //结果部分，即RHS
     then
-    	System.out.println("升级成功");
+    	System.out.println("积分已超过500，是否升级为高级会员？");
+    	Scanner scan = new Scanner(System.in);
+    	String flag = scan.nextLine();
+    	System.out.println("积分已超过500"+flag);
+    	if(flag.equals("是") || flag.equals("y") || flag.equals("Y")){
+    		$use.setU_level("高级会员");
+    		$use.setU_point((float)($use.getU_point()-500));
+    		UserDao userServices=new UserDao();
+    		boolean result=userServices.updateUserLevel($use.getU_id(),$use.getU_level());
+    		if(result){
+    			System.out.println("会员升级成功");
+    			update( $use);
+    		}
+    		
+    		
+    	}
+    	
+    	//$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
+    	//$order.setO_point((float)($order.getO_amountMoney()*0.8+5));
+    
+    	//$use.setU_point((float)($use.getU_point()+$order.getO_point()));
+    	
+    	//$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+		//$use.recordPointLog($use.getU_id(),"PrimaryToHightMember",$use.getU_point());
+		
+    	
+end
+
+// 初级可在积分满200分时转成临时会员  ，购买货物时可得9.5折优惠
+rule "PrimaryToTemporaryMember"
+	//属性部分
+	//优先级
+	salience 95
+	//控制当前的规则只被执行一次
+	lock-on-active true   
+	
+	//条件部分，即LHS,
+	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
+	when
+		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
+		//如何从外部拿一个值进来
+		//$flag:Integer(flag02==1);
+		$order:Order();
+        $use:User( u_level=="初级会员" && u_point>=200 );
+        
+    //结果部分，即RHS
+    then
+    	int tflag=3;
+    	System.out.println("积分已超过200，是否升级为临时会员？");
+    	Scanner scan = new Scanner(System.in);
+    	String flag = scan.nextLine();
+    	if(flag.equals("是") || flag.equals("y") || flag.equals("Y")){
+    		$use.setU_level("临时会员");
+    		$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
+    		
+    		UserDao userServices=new UserDao();
+    		boolean result=userServices.updateUserLevel($use.getU_id(),$use.getU_level());
+    		if(result){
+    			System.out.println("会员升级成功");
+    			
+    		}
+    		
+    		
+    	}
+    	
     	//$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
     	//$order.setO_point((float)($order.getO_amountMoney()*0.8+5));
     
@@ -159,21 +226,35 @@ rule  "buyNumPoint"
 		 $pointDome.recordPointLog($pointDome.getUserName(),"buyNumPoint");
 end 
 
-
+*/
 
 //200积分可抵现金2元
 rule "allFitPoint"
-	salience 96
+	salience 110
 	lock-on-active  true
 	//如果全部满足，则额外加100 积分
 	when
  	 	$use:User( u_point>=200);
- 	 	$order :Oder();
+ 	 	$order :Order();
 	then
-		$order.setO_amountMoney((float)($order.getO_amountMoney()-(int)$user.getU_point()/200*2));
-		$use.setU_point($use.getU_point()-200);
-		$order.orderPoint($order.getU_id(),$order.getO_amountMoney(),$order.getO_point());
-		$use.recordPointLog($use.getU_id(),"allFitPoint",$use.getU_point());
+		System.out.println("你的积分超过200，是否兑换现金?");
+    	Scanner scan = new Scanner(System.in);
+    	String flag = scan.nextLine();
+    	if(flag.equals("是") || flag.equals("y") || flag.equals("Y")){
+    		$order.setO_amountMoney((float)($order.getO_amountMoney()-Math.floor($use.getU_point()/200)*2));
+    		System.out.println("本次消费："+$order.getO_amountMoney());
+    		$use.setU_point((float)($use.getU_point()-Math.floor($use.getU_point()/200)*200));
+    		UserDao userServices=new UserDao();
+    		boolean result=userServices.updateUserPoint($use.getU_id(),$use.getU_point());
+    		if(result){
+    			System.out.println("兑换成功");
+    			$use.recordPointLog($use.getU_id(),"allFitPoint",$use.getU_point());
+    			
+    		}else{
+    			update($use);
+    		}
+    		
+    	}
 		
 end
-*/
+
