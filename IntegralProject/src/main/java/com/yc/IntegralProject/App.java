@@ -23,27 +23,6 @@ public class App {
 	public static void main(String[] args) {
 		DbHelper db = new DbHelper();
 
-		// try {
-		// String sql = "insert into tUser values(?,?,?,?)";
-		// User user = new User();
-		// List<Object> params = new ArrayList<>();
-		// params.add("9871");
-		// params.add("小明");
-		// params.add("初级会员");
-		// params.add("990");
-		// db.doUpdate(sql, params);
-		// String sql2 = "select * from tUser";
-		// Map<String, Object> map = db.findSingleObject(sql2, null);
-		// System.out.println(map.get("U_NAME"));
-		//
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (FileNotFoundException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-
 		// KieServices就是一个中心，通过它来获取的各种对象来完成规则构建、管理和执行等操作
 		KieServices ks = KieServices.Factory.get();
 		// 可以理解KieContainer就是一个KieBase的容器,KieBase就是一个知识仓库，包含了若干的规则、流程、方法等
@@ -87,17 +66,6 @@ public class App {
 		order.setO_count(number);
 		order.setO_amountMoney(money);
 
-		/*
-		 * Integer flag02 = null; if (user.getU_level() == "初级会员" &&
-		 * user.getU_point() >= 500) {
-		 * System.out.println("您的积分已超过500，是否愿意花500积分升级为高级会员？"); Scanner flag03 =
-		 * new Scanner(System.in); if (flag03.equals("是") || flag03.equals("y")
-		 * || flag03.equals("Y")) { flag02 = 1; } else { flag02 = 0; }
-		 * 
-		 * }
-		 */
-
-		// kSession.insert(flag02);
 		kSession.insert(user);
 		kSession.insert(order);
 
@@ -110,17 +78,19 @@ public class App {
 		int u_id = user.getU_id();
 		float u_point = user.getU_point();
 		try {
+			// 改变会员的积分
 			boolean flag = useDao.updateUserPoint(u_id, u_point);
-			if (flag) {
-				System.out.println("插入成功");
-			}
+			/*
+			 * if (flag) { System.out.println("插入成功"); }
+			 */
 			int o_count = order.getO_count();
 			float o_amount = order.getO_amountMoney();
 			float o_point = order.getO_point();
+			// 插入会员的购买记录
 			boolean flag1 = orderDao.insertOrder(u_id, o_count, o_amount, o_point);
-			if (flag1) {
-				System.out.println("插入成功");
-			}
+			/*
+			 * if (flag1) { System.out.println("插入成功"); }
+			 */
 		} catch (FileNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block6
 			e.printStackTrace();

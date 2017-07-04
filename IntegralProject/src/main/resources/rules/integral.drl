@@ -24,7 +24,6 @@ rule "primaryMember1"
     //结果部分，即RHS
     then
     	
-    	
     	$order.setO_point((float)($order.getO_amountMoney()*0.5));
     
     	$use.setU_point((float)($use.getU_point()+$order.getO_amountMoney()*0.5));
@@ -47,7 +46,7 @@ rule "primaryMember2"
 	when
 		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
 		$order:Order();
-        $use:User( u_level=="初级会员" && $order.getO_amountMoney()>=20 && $order.getO_amountMoney()<=50);
+        $use:User( u_level=="初级会员" && $order.getO_amountMoney()>20 && $order.getO_amountMoney()<=50);
         
     //结果部分，即RHS
     then
@@ -113,24 +112,13 @@ rule "PrimaryToHightMember"
     		$use.setU_level("高级会员");
     		$use.setU_point((float)($use.getU_point()-500));
     		UserDao userServices=new UserDao();
+    		//升级为高级会员
     		boolean result=userServices.updateUserLevel($use.getU_id(),$use.getU_level());
     		if(result){
     			System.out.println("会员升级成功");
     			update( $use);
     		}
-    		
-    		
     	}
-    	
-    	//$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
-    	//$order.setO_point((float)($order.getO_amountMoney()*0.8+5));
-    
-    	//$use.setU_point((float)($use.getU_point()+$order.getO_point()));
-    	
-    	//$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
-		//$use.recordPointLog($use.getU_id(),"PrimaryToHightMember",$use.getU_point());
-		
-    	
 end
 
 // 初级可在积分满200分时转成临时会员  ，购买货物时可得9.5折优惠
@@ -161,6 +149,7 @@ rule "PrimaryToTemporaryMember"
     		$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
     		
     		UserDao userServices=new UserDao();
+    		//初级会员升级为临时会员
     		boolean result=userServices.updateUserLevel($use.getU_id(),$use.getU_level());
     		if(result){
     			System.out.println("会员升级成功");
@@ -182,7 +171,6 @@ rule "TemporaryMember"
 	when
 		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
 		//如何从外部拿一个值进来
-		//$flag:Integer(flag02==1);
 		$order:Order();
         $use:User( u_level=="临时会员");
         
@@ -191,7 +179,7 @@ rule "TemporaryMember"
     	UserDao userServices=new UserDao();
     	if($use.getFlag()<3){
     		$order.setO_amountMoney((float)($order.getO_amountMoney()*0.95));
-    		
+    		//更改临时会员的使用次数
     		boolean result=userServices.updateFlag($use.getU_id());
     		$use.setFlag((int)$use.getFlag()+1);
     		if(result){
@@ -208,53 +196,6 @@ rule "TemporaryMember"
     	
     	
 end
-
-/*
-rule "billThisMonthPoint"
-	//2017-7-1 -2017-12-12每月信用卡还款3次以上，每满3笔赠送30分
-	salience 99
-	lock-on-active true
-	date-effective "01-007-2017"  //设置规则的生效时间
-	date-expires "24-012-2017"   //设置规则的过期时间
-	
-    when
-       $pointDome : PointDome( billThisMonth>3)
-       
-    then
-        $pointDome.setPoint($pointDome.getPoint()+$pointDome.getBillThisMonth()/3*30);
-       	
-       	$pointDome.recordPointLog($pointDome.getUserName(),"billThisMonthPoint");
-       	
-end
-
-
-rule "buyMoneyPoint"
-	//当月购物金额100以上，每100送10分积分
-	salience 98
-	lock-on-active true
-	
-	when 
-		 $pointDome : PointDome(buyMoney>=100 )
-	then
-		 $pointDome.setPoint( $pointDome.getPoint()+(int)$pointDome.getBuyMoney()/100*10);
-		 
- 		$pointDome.recordPointLog($pointDome.getUserName(),"buyMoneyPoin");
-end
-
-rule  "buyNumPoint"
-	//当月购物次数5次以上，每5次赠送50分
-	salience 97
-	lock-on-active true
-	
-	when 
-		 $pointDome : PointDome(buyNum>5 )
-	then 
-		 $pointDome.setPoint( $pointDome.getPoint()+$pointDome.getBuyNum()/5*50);
-		 
-		 $pointDome.recordPointLog($pointDome.getUserName(),"buyNumPoint");
-end 
-
-*/
 
 //200积分可抵现金2元
 rule "allFitPoint"
@@ -273,6 +214,7 @@ rule "allFitPoint"
     		System.out.println("本次消费："+$order.getO_amountMoney());
     		$use.setU_point((float)($use.getU_point()-Math.floor($use.getU_point()/200)*200));
     		UserDao userServices=new UserDao();
+    		//积分超过200，兑换现金
     		boolean result=userServices.updateUserPoint($use.getU_id(),$use.getU_point());
     		if(result){
     			System.out.println("兑换成功");
@@ -281,8 +223,6 @@ rule "allFitPoint"
     		}else{
     			update($use);
     		}
-    		
     	}
-		
 end
 
