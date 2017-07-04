@@ -44,8 +44,12 @@ public class App {
 		// e.printStackTrace();
 		// }
 
+		// KieServices就是一个中心，通过它来获取的各种对象来完成规则构建、管理和执行等操作
 		KieServices ks = KieServices.Factory.get();
+		// 可以理解KieContainer就是一个KieBase的容器,KieBase就是一个知识仓库，包含了若干的规则、流程、方法等
 		KieContainer kContainer = ks.getKieClasspathContainer();
+		// 我们通过KieContainer创建KieSession是一种较为方便的做法，其实他本质上是从KieBase中创建出来
+		// KieSession就是应用程序跟规则引擎进行交互的会话通道。
 		KieSession kSession = kContainer.newKieSession("ksession-rules");
 
 		Scanner scan = new Scanner(System.in);
