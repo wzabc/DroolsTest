@@ -44,6 +44,7 @@ public class App {
 		Scanner scan3 = new Scanner(System.in);
 		System.out.println("请输会员号：");
 		String members = scan3.nextLine();
+
 		int member = Integer.parseInt(members);
 
 		float money = price * number;

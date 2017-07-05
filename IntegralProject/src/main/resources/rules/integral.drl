@@ -53,11 +53,35 @@ rule "primaryMember2"
     	$order.setO_point((float)(($order.getO_amountMoney()-20)*0.7+10));
     
     	$use.setU_point((float)($use.getU_point()+($order.getO_amountMoney()-20)*0.7+10));
-    	System.out.println($use.getU_point());
     	$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
 		$use.recordPointLog($use.getU_id(),"primaryMember2",$use.getU_point());
     	
 end
+
+rule "primaryMember3"
+	//属性部分
+	//优先级
+	salience 98   
+	//控制当前的规则只被执行一次
+	lock-on-active true   
+	
+	//条件部分，即LHS,
+	//过生日，则加10分，并且当月的交易比数翻倍后再计算积分.
+	when
+		//这句话标示了：当前workingMemory存在Message类型并且status的属性是 Message.HELLO的Fact对象
+		$order:Order();
+        $use:User( u_level=="初级会员" && $order.getO_amountMoney()>50);
+        
+    //结果部分，即RHS
+    then
+    	$order.setO_point((float)($order.getO_amountMoney()*0.7));
+    
+    	$use.setU_point((float)($use.getU_point()+$order.getO_amountMoney()*0.7));
+    	$order.orderPoint($use.getU_id(),$order.getO_amountMoney(),$order.getO_point());
+		$use.recordPointLog($use.getU_id(),"primaryMember3",$use.getU_point());
+    	
+end
+
 
 //高级会员    购买货物时  可获得9.5折优惠  并可得积分为：折后价格*0.8+5
 rule "hightMember"
@@ -89,7 +113,7 @@ end
 rule "PrimaryToHightMember"
 	//属性部分
 	//优先级
-	salience 98 
+	salience 92
 	//控制当前的规则只被执行一次
 	lock-on-active true   
 	
@@ -104,7 +128,7 @@ rule "PrimaryToHightMember"
         
     //结果部分，即RHS
     then
-    	System.out.println("积分已超过500，是否升级为高级会员？");
+    	System.out.println("积分已超过500，是否升级为高级会员？请输入y/n");
     	Scanner scan = new Scanner(System.in);
     	String flag = scan.nextLine();
     	System.out.println("积分已超过500"+flag);
@@ -116,7 +140,6 @@ rule "PrimaryToHightMember"
     		boolean result=userServices.updateUserLevel($use.getU_id(),$use.getU_level());
     		if(result){
     			System.out.println("会员升级成功");
-    			update( $use);
     		}
     	}
 end
@@ -136,12 +159,12 @@ rule "PrimaryToTemporaryMember"
 		//如何从外部拿一个值进来
 		//$flag:Integer(flag02==1);
 		$order:Order();
-        $use:User( u_level=="初级会员" && u_point>=200);
+        $use:User( u_level=="初级会员" && u_point>=200 && flag<3);
         
     //结果部分，即RHS
     then
     	
-    	System.out.println("积分已超过200，是否升级为临时会员？");
+    	System.out.println("积分已超过200，是否升级为临时会员？请输入y/n");
     	Scanner scan = new Scanner(System.in);
     	String flag = scan.nextLine();
     	if(flag.equals("是") || flag.equals("y") || flag.equals("Y")){
@@ -152,8 +175,7 @@ rule "PrimaryToTemporaryMember"
     		//初级会员升级为临时会员
     		boolean result=userServices.updateUserLevel($use.getU_id(),$use.getU_level());
     		if(result){
-    			System.out.println("会员升级成功");
-    			
+    			System.out.println("初级会员："+$use.getU_id()+",您已升级为临时会员");
     		}
     	}
 end
@@ -206,7 +228,7 @@ rule "allFitPoint"
  	 	$use:User( u_point>=200);
  	 	$order :Order();
 	then
-		System.out.println("你的积分超过200，是否兑换现金?");
+		System.out.println("你的积分超过200，是否兑换现金?请输入y/n");
     	Scanner scan = new Scanner(System.in);
     	String flag = scan.nextLine();
     	if(flag.equals("是") || flag.equals("y") || flag.equals("Y")){
