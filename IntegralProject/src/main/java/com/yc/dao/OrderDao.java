@@ -13,7 +13,7 @@ public class OrderDao {
 	// 插入订单表
 	public boolean insertOrder(int u_id, int o_count, float o_amount, float o_point)
 	        throws FileNotFoundException, SQLException {
-		String sql = "insert into tOrders values(seq_o_id.nextval,?,?,?,?)";
+		String sql = "insert into tOrders values(seq_o_id.nextval,?,?,?,?,sysdate)";
 		List<Object> params = new ArrayList<>();
 		params.add(u_id);
 		params.add(o_count);

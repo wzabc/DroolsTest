@@ -1,5 +1,7 @@
 package com.yc.pro;
 
+import java.util.Date;
+
 public class Order {
 
 	private Integer o_id;
@@ -7,6 +9,15 @@ public class Order {
 	private int o_count;
 	private float o_amountMoney;
 	private float o_point;
+	private Date buyDate;
+
+	public Date getBuyDate() {
+		return buyDate;
+	}
+
+	public void setBuyDate(Date buyDate) {
+		this.buyDate = buyDate;
+	}
 
 	public void orderPoint(int id, float o_amountMoney, float point) {
 		System.out.println("会员:" + id + "本次消费:" + o_amountMoney + ",本次所得积分为:" + o_point);
@@ -56,19 +67,20 @@ public class Order {
 		super();
 	}
 
-	public Order(Integer o_id, int u_id, int o_count, float o_amountMoney, float o_point) {
+	@Override
+	public String toString() {
+		return "Order [o_id=" + o_id + ", u_id=" + u_id + ", o_count=" + o_count + ", o_amountMoney=" + o_amountMoney
+		        + ", o_point=" + o_point + ", buyDate=" + buyDate + "]";
+	}
+
+	public Order(Integer o_id, int u_id, int o_count, float o_amountMoney, float o_point, Date buyDate) {
 		super();
 		this.o_id = o_id;
 		this.u_id = u_id;
 		this.o_count = o_count;
 		this.o_amountMoney = o_amountMoney;
 		this.o_point = o_point;
-	}
-
-	@Override
-	public String toString() {
-		return "Order [o_id=" + o_id + ", u_id=" + u_id + ", o_count=" + o_count + ", o_amountMoney=" + o_amountMoney
-		        + ", o_point=" + o_point + "]";
+		this.buyDate = buyDate;
 	}
 
 }

@@ -42,22 +42,35 @@ public class App {
 		String numbers = scan2.nextLine();
 		int number = Integer.parseInt(numbers);
 		Scanner scan3 = new Scanner(System.in);
-		System.out.println("请输会员号：");
-		String members = scan3.nextLine();
 
-		int member = Integer.parseInt(members);
+		int member = 0;
 
 		float money = price * number;
 		User user = new User();
 		UserDao useDao = new UserDao();
 		String level = null;
 		try {
-			Map<String, Object> map = useDao.doLevel(member);
-			user.setU_level((String) (map.get("U_LEVEL")));
-			user.setU_id(member);
-			user.setU_name((String) (map.get("U_NAME")));
-			user.setU_point(Float.parseFloat((String) (map.get("U_POINT"))));
-			user.setFlag(Integer.parseInt((String) map.get("TFLAG")));
+			Map<String, Object> map = null;
+			int flag = 0;
+			do {
+				if (flag > 0) {
+					System.out.println("此会员号不存在！！");
+				}
+				System.out.println("请输会正确的员号：");
+				String members = scan3.nextLine();
+				member = Integer.parseInt(members);
+				map = useDao.doLevel(member);
+				flag++;
+			} while (map == null);
+
+			if (map != null && map.size() > 0) {
+				user.setU_level((String) (map.get("U_LEVEL")));
+				user.setU_id(member);
+				user.setU_name((String) (map.get("U_NAME")));
+				user.setU_point(Float.parseFloat((String) (map.get("U_POINT"))));
+				user.setFlag(Integer.parseInt((String) map.get("TFLAG")));
+			}
+
 		} catch (FileNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
